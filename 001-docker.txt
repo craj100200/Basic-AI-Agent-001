@@ -1,0 +1,9 @@
+To create an ubuntu docker container, first pull the  ubuntu docker image 
+
+Docker pull ubunu
+
+Then simply create the container with 
+Docker run -it ubuntu 
+
+
+docker run -it --name myct1 -p 10000-10005:10000-10005  -v /Users/atharvachandras/desktop/rajesh:/app/rajesh  ubuntu

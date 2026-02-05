@@ -1,0 +1,13 @@
+from moviepy.editor import ImageClip, concatenate_videoclips
+
+def make_video(images, durations):
+    clips = []
+
+    for img, dur in zip(images, durations):
+        clips.append(ImageClip(img).set_duration(dur))
+
+    video = concatenate_videoclips(clips, method="compose")
+    output = "workspace/output/presentation.mp4"
+    video.write_videofile(output, fps=24)
+
+    return output
