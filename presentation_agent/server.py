@@ -1,7 +1,8 @@
 # server.py
 import os
 import logging
-from fastapi import FastAPI, BackgroundTasks
+import shutil
+from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Query
 from fastapi.responses import FileResponse
 
 # Full package imports
@@ -19,61 +20,86 @@ app = FastAPI()
 # Base directory (this file location)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Input and output paths
-INPUT_FILE = os.path.join(BASE_DIR, "input.txt")
-OUTPUT_VIDEO_PATH = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
+# Ensure workspace folders exist
+INPUT_DIR = os.path.join(BASE_DIR, "workspace/input")
+OUTPUT_DIR = os.path.join(BASE_DIR, "workspace/output")
+os.makedirs(INPUT_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Ensure output folder exists
-os.makedirs(os.path.dirname(OUTPUT_VIDEO_PATH), exist_ok=True)
 
-def generate_video_task(input_file=INPUT_FILE):
+def generate_video_task(input_file_path: str, output_file_path: str):
     """
-    Runs the full video generation pipeline in the background with logging.
+    Full pipeline: Input -> Plan -> Slides -> Video
+    Saves video to output_file_path
     """
     try:
-        logger.info("===== Video generation started =====")
+        logger.info(f"Video generation started for {input_file_path}")
 
-        # Step 1: Read slides
-        slides = InputAgent().run(input_file)
+        slides = InputAgent().run(input_file_path)
         logger.info(f"Slides processed: {len(slides)}")
 
-        # Step 2: Plan slide flow
         plan = PlannerAgent().run(slides)
         logger.info(f"Slide plan created with {len(plan)} steps")
 
-        # Step 3: Generate slide images
         images = SlideAgent().run(plan)
         logger.info(f"Generated {len(images)} slide images")
 
-        # Step 4: Generate video
+        # Generate video
+        # VideoAgent.run() generates a default file internally (e.g., workspace/output/presentation.mp4)
         VideoAgent().run(images, plan)
-        logger.info(f"Video successfully saved to {OUTPUT_VIDEO_PATH}")
+        temp_video_path = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
+
+        # Rename/move to output_file_path
+        if os.path.exists(temp_video_path):
+            os.replace(temp_video_path, output_file_path)
+            logger.info(f"Video successfully saved to {output_file_path}")
+        else:
+            logger.error("Video generation failed: temp video not found.")
 
     except Exception as e:
-        logger.exception(f"Video generation failed: {e}")
+        logger.exception(f"Video generation failed for {input_file_path}: {e}")
+
 
 @app.post("/generate")
-def generate(background_tasks: BackgroundTasks):
+def generate(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     """
-    Starts video generation in the background.
-    Returns immediately to avoid 502 timeout.
+    Upload a text file and start video generation in the background.
+    Video output will have the same base name as the uploaded file but with .mp4 extension.
     """
-    background_tasks.add_task(generate_video_task)
-    return {"status": "Video generation started! Watch logs and check /download when done."}
+    # Save uploaded file
+    input_file_path = os.path.join(INPUT_DIR, file.filename)
+    with open(input_file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    # Output MP4 path
+    base_name = os.path.splitext(file.filename)[0]
+    output_file_path = os.path.join(OUTPUT_DIR, f"{base_name}.mp4")
+
+    # Start background task
+    background_tasks.add_task(generate_video_task, input_file_path, output_file_path)
+
+    return {
+        "status": "Video generation started!",
+        "input_file": file.filename,
+        "output_file": f"{base_name}.mp4"
+    }
+
 
 @app.get("/download")
-def download():
+def download(file_name: str = Query(..., description="Name of the MP4 file to download")):
     """
-    Returns the generated MP4 file if it exists.
+    Returns the generated MP4 file by name if it exists.
     """
-    if not os.path.exists(OUTPUT_VIDEO_PATH):
+    output_file_path = os.path.join(OUTPUT_DIR, file_name)
+    if not os.path.exists(output_file_path):
         return {"error": "Video not ready yet. Call /generate first."}
 
     return FileResponse(
-        OUTPUT_VIDEO_PATH,
+        output_file_path,
         media_type="video/mp4",
-        filename="presentation.mp4"
+        filename=file_name
     )
+
 
 @app.get("/")
 def home():
