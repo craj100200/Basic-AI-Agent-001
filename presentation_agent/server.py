@@ -1,9 +1,10 @@
 import os
 from fastapi import FastAPI
-from agents.input_agent import InputAgent
-from agents.planner_agent import PlannerAgent
-from agents.slide_agent import SlideAgent
-from agents.video_agent import VideoAgent
+from presentation_agent.agents.input_agent import InputAgent
+from presentation_agent.agents.planner_agent import PlannerAgent
+from presentation_agent.agents.slide_agent import SlideAgent
+from presentation_agent.agents.video_agent import VideoAgent
+
 
 import sys
 
