@@ -6,13 +6,17 @@ from agents.video_agent import VideoAgent
 
 import os
 
-os.makedirs("workspace/slides", exist_ok=True)
-os.makedirs("workspace/output", exist_ok=True)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INPUT_FILE = os.path.join(BASE_DIR, "input.txt")
+
+os.makedirs(os.path.join(BASE_DIR, "workspace/slides"), exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, "workspace/output"), exist_ok=True)
 
 
 
 def main():
-    slides = InputAgent().run("input.txt")
+    slides = InputAgent().run(INPUT_FILE)
     plan = PlannerAgent().run(slides)
     images = SlideAgent().run(plan)
     output = VideoAgent().run(images, plan)
