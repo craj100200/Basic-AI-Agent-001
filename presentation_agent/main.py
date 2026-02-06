@@ -5,6 +5,9 @@ from agents.video_agent import VideoAgent
 
 
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
