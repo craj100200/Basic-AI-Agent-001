@@ -36,23 +36,33 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def generate_video_task(input_file_path: str, output_file_path: str):
     """
-    Generates video directly to the output_file_path.
+    Generates video using VideoAgent and moves to desired output path.
     """
     try:
         logger.info(f"Video generation started for {input_file_path}")
 
+        # Parse slides
         slides = InputAgent().run(input_file_path)
         logger.info(f"Slides processed: {len(slides)}")
 
+        # Plan slides
         plan = PlannerAgent().run(slides)
         logger.info(f"Slide plan created with {len(plan)} steps")
 
+        # Render slide images
         images = SlideAgent().run(plan)
         logger.info(f"Generated {len(images)} slide images")
 
-        # Pass output path directly to VideoAgent
-        VideoAgent().run(images, plan, output_path=output_file_path)
-        logger.info(f"Video successfully saved to {output_file_path}")
+        # Generate video (VideoAgent currently does NOT accept output_path)
+        VideoAgent().run(images, plan)
+
+        # Move temp video to desired output path
+        temp_video_path = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
+        if os.path.exists(temp_video_path):
+            os.replace(temp_video_path, output_file_path)
+            logger.info(f"Video successfully saved to {output_file_path}")
+        else:
+            logger.error("Video generation failed: temp video not found.")
 
     except Exception as e:
         logger.exception(f"Video generation failed for {input_file_path}: {e}")
