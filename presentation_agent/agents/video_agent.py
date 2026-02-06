@@ -1,4 +1,4 @@
-from tools.video_renderer import make_video
+from presentation_agent.tools.video_renderer import make_video
 
 class VideoAgent:
     def run(self, images, plan):

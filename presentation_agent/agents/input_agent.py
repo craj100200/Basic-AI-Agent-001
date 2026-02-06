@@ -1,4 +1,4 @@
-from tools.text_parser import parse_slides
+from presentation_agent.tools.text_parser import parse_slides
 
 class InputAgent:
     def run(self, path):

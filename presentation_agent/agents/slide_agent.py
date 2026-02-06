@@ -1,4 +1,4 @@
-from tools.slide_renderer import render_slide
+from presentation_agent.tools.slide_renderer import render_slide
 
 class SlideAgent:
     def run(self, plan):
