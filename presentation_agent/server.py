@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Allow CORS for testing from browsers if needed
+# Allow CORS for testing
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,6 +35,9 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def generate_video_task(input_file_path: str, output_file_path: str):
+    """
+    Generates video directly to the output_file_path.
+    """
     try:
         logger.info(f"Video generation started for {input_file_path}")
 
@@ -47,15 +50,9 @@ def generate_video_task(input_file_path: str, output_file_path: str):
         images = SlideAgent().run(plan)
         logger.info(f"Generated {len(images)} slide images")
 
-        # Generate video
-        VideoAgent().run(images, plan)
-        temp_video_path = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
-
-        if os.path.exists(temp_video_path):
-            os.replace(temp_video_path, output_file_path)
-            logger.info(f"Video successfully saved to {output_file_path}")
-        else:
-            logger.error("Video generation failed: temp video not found.")
+        # Pass output path directly to VideoAgent
+        VideoAgent().run(images, plan, output_path=output_file_path)
+        logger.info(f"Video successfully saved to {output_file_path}")
 
     except Exception as e:
         logger.exception(f"Video generation failed for {input_file_path}: {e}")
@@ -79,9 +76,7 @@ def generate(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     }
 
 
-# --------------------
-# New JSON-based endpoint
-# --------------------
+# JSON-based endpoint
 class JSONInput(BaseModel):
     fileName: str
     fileText: str

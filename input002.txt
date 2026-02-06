@@ -1,0 +1,36 @@
+[SLIDE_START]
+[TITLE_START]
+Agentic AI
+[TITLE_END]
+Systems that can plan actions
+Systems that execute tasks
+Systems that evaluate results
+[SLIDE_END]
+
+[SLIDE_START]
+[TITLE_START]
+Why it matters
+[TITLE_END]
+Reduces human intervention
+Improves scalability
+Enables autonomy
+[SLIDE_END]
+
+
+[SLIDE_START]
+[TITLE_START]
+Agentic AI
+[TITLE_END]
+Systems that can plan actions
+Systems that execute tasks
+Systems that evaluate results
+[SLIDE_END]
+
+[SLIDE_START]
+[TITLE_START]
+Why it matters
+[TITLE_END]
+Reduces human intervention
+Improves scalability
+Enables autonomy
+[SLIDE_END]
