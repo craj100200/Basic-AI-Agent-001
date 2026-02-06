@@ -4,7 +4,7 @@ import logging
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import FileResponse
 
-# ✅ Full package imports
+# Full package imports
 from presentation_agent.agents.input_agent import InputAgent
 from presentation_agent.agents.planner_agent import PlannerAgent
 from presentation_agent.agents.slide_agent import SlideAgent
@@ -16,15 +16,19 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Output file path
-OUTPUT_VIDEO_PATH = "workspace/output/presentation.mp4"
+# Base directory (this file location)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Input and output paths
+INPUT_FILE = os.path.join(BASE_DIR, "input.txt")
+OUTPUT_VIDEO_PATH = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
 
 # Ensure output folder exists
 os.makedirs(os.path.dirname(OUTPUT_VIDEO_PATH), exist_ok=True)
 
-def generate_video_task(input_file="input.txt"):
+def generate_video_task(input_file=INPUT_FILE):
     """
-    Runs the full pipeline in background with detailed logging.
+    Runs the full video generation pipeline in the background with logging.
     """
     try:
         logger.info("===== Video generation started =====")
@@ -51,7 +55,8 @@ def generate_video_task(input_file="input.txt"):
 @app.post("/generate")
 def generate(background_tasks: BackgroundTasks):
     """
-    Starts video generation in background and returns immediately.
+    Starts video generation in the background.
+    Returns immediately to avoid 502 timeout.
     """
     background_tasks.add_task(generate_video_task)
     return {"status": "Video generation started! Watch logs and check /download when done."}
@@ -73,3 +78,4 @@ def download():
 @app.get("/")
 def home():
     return {"status": "AI Presentation Service is live!"}
+
