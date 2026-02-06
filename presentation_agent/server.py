@@ -45,8 +45,8 @@ def generate_video_task(input_file=INPUT_FILE):
         images = SlideAgent().run(plan)
         logger.info(f"Generated {len(images)} slide images")
 
-        # Step 4: Generate video and save to OUTPUT_VIDEO_PATH
-        VideoAgent().run(images, plan, output_path=OUTPUT_VIDEO_PATH)
+        # Step 4: Generate video
+        VideoAgent().run(images, plan)
         logger.info(f"Video successfully saved to {OUTPUT_VIDEO_PATH}")
 
     except Exception as e:
@@ -78,4 +78,3 @@ def download():
 @app.get("/")
 def home():
     return {"status": "AI Presentation Service is live!"}
-
