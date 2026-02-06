@@ -11,4 +11,5 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "presentation_agent/main.py"]
+
+CMD ["uvicorn", "presentation_agent.server:app", "--host", "0.0.0.0", "--port", "10000"]
