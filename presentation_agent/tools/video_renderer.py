@@ -1,4 +1,5 @@
 from moviepy import ImageClip, concatenate_videoclips
+import os
 
 def make_video(images, durations):
     """
@@ -11,6 +12,9 @@ def make_video(images, durations):
     Returns:
         str — path to the created video file
     """
+
+    os.makedirs("workspace/output", exist_ok=true)
+
     clips = []
     
     for img_path, duration in zip(images, durations):

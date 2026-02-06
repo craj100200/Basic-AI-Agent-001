@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
+import os
 
 WIDTH, HEIGHT = 1280, 720
 BG_COLOR = (30, 30, 30)
@@ -7,6 +8,9 @@ TEXT_COLOR = (240, 240, 240)
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 def render_slide(title, bullets, index):
+
+   os.makedirs("workspace/slides", exist_ok=true)
+
     img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
