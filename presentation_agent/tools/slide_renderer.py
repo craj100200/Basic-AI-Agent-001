@@ -9,7 +9,7 @@ FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 def render_slide(title, bullets, index):
 
-   os.makedirs("workspace/slides", exist_ok=true)
+    os.makedirs("workspace/slides", exist_ok=true)
 
     img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
     draw = ImageDraw.Draw(img)
