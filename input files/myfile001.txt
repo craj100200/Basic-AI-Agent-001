@@ -1,0 +1,28 @@
+[SLIDE_START]
+[TITLE_START]Introduction to AI[TITLE_END]
+Artificial Intelligence (AI) is the simulation of human intelligence.
+It includes problem-solving, learning, and reasoning.
+AI can be categorized as Narrow AI, General AI, and Super AI.
+[SLIDE_END]
+
+[SLIDE_START]
+[TITLE_START]Applications of AI[TITLE_END]
+Self-driving cars
+Medical diagnosis
+Personal assistants like Siri and Alexa
+Recommendation systems (Netflix, Amazon)
+[SLIDE_END]
+
+[SLIDE_START]
+[TITLE_START]Machine Learning[TITLE_END]
+Machine Learning is a subset of AI.
+It allows systems to learn from data without explicit programming.
+Types: Supervised, Unsupervised, Reinforcement learning.
+[SLIDE_END]
+
+[SLIDE_START]
+[TITLE_START]Conclusion[TITLE_END]
+AI is transforming industries and daily life.
+Ethical considerations and safety are important.
+Continuous learning and research drive AI progress.
+[SLIDE_END]

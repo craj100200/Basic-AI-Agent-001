@@ -4,23 +4,30 @@ import logging
 import shutil
 from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Query
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-# Full package imports
+# Agents
 from presentation_agent.agents.input_agent import InputAgent
 from presentation_agent.agents.planner_agent import PlannerAgent
 from presentation_agent.agents.slide_agent import SlideAgent
 from presentation_agent.agents.video_agent import VideoAgent
 
-# Configure logging
+# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Base directory (this file location)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Allow CORS for testing from browsers if needed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Ensure workspace folders exist
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INPUT_DIR = os.path.join(BASE_DIR, "workspace/input")
 OUTPUT_DIR = os.path.join(BASE_DIR, "workspace/output")
 os.makedirs(INPUT_DIR, exist_ok=True)
@@ -28,10 +35,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def generate_video_task(input_file_path: str, output_file_path: str):
-    """
-    Full pipeline: Input -> Plan -> Slides -> Video
-    Saves video to output_file_path
-    """
     try:
         logger.info(f"Video generation started for {input_file_path}")
 
@@ -45,11 +48,9 @@ def generate_video_task(input_file_path: str, output_file_path: str):
         logger.info(f"Generated {len(images)} slide images")
 
         # Generate video
-        # VideoAgent.run() generates a default file internally (e.g., workspace/output/presentation.mp4)
         VideoAgent().run(images, plan)
         temp_video_path = os.path.join(BASE_DIR, "workspace/output/presentation.mp4")
 
-        # Rename/move to output_file_path
         if os.path.exists(temp_video_path):
             os.replace(temp_video_path, output_file_path)
             logger.info(f"Video successfully saved to {output_file_path}")
@@ -62,20 +63,13 @@ def generate_video_task(input_file_path: str, output_file_path: str):
 
 @app.post("/generate")
 def generate(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
-    """
-    Upload a text file and start video generation in the background.
-    Video output will have the same base name as the uploaded file but with .mp4 extension.
-    """
-    # Save uploaded file
     input_file_path = os.path.join(INPUT_DIR, file.filename)
     with open(input_file_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
 
-    # Output MP4 path
     base_name = os.path.splitext(file.filename)[0]
     output_file_path = os.path.join(OUTPUT_DIR, f"{base_name}.mp4")
 
-    # Start background task
     background_tasks.add_task(generate_video_task, input_file_path, output_file_path)
 
     return {
@@ -85,20 +79,39 @@ def generate(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     }
 
 
+# --------------------
+# New JSON-based endpoint
+# --------------------
+class JSONInput(BaseModel):
+    fileName: str
+    fileText: str
+
+
+@app.post("/generateFromJson")
+def generate_from_json(background_tasks: BackgroundTasks, data: JSONInput):
+    input_file_path = os.path.join(INPUT_DIR, data.fileName)
+    with open(input_file_path, "w", encoding="utf-8") as f:
+        f.write(data.fileText)
+
+    base_name = os.path.splitext(data.fileName)[0]
+    output_file_path = os.path.join(OUTPUT_DIR, f"{base_name}.mp4")
+
+    background_tasks.add_task(generate_video_task, input_file_path, output_file_path)
+
+    return {
+        "status": "Video generation started!",
+        "input_file": data.fileName,
+        "output_file": f"{base_name}.mp4"
+    }
+
+
 @app.get("/download")
 def download(file_name: str = Query(..., description="Name of the MP4 file to download")):
-    """
-    Returns the generated MP4 file by name if it exists.
-    """
     output_file_path = os.path.join(OUTPUT_DIR, file_name)
     if not os.path.exists(output_file_path):
-        return {"error": "Video not ready yet. Call /generate first."}
+        return {"error": "Video not ready yet. Call /generate or /generateFromJson first."}
 
-    return FileResponse(
-        output_file_path,
-        media_type="video/mp4",
-        filename=file_name
-    )
+    return FileResponse(output_file_path, media_type="video/mp4", filename=file_name)
 
 
 @app.get("/")
