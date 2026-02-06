@@ -13,7 +13,7 @@ def make_video(images, durations):
         str — path to the created video file
     """
 
-    os.makedirs("workspace/output", exist_ok=true)
+    os.makedirs("workspace/output", exist_ok=True)
 
     clips = []
     
