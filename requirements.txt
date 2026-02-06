@@ -2,3 +2,4 @@ pillow
 moviepy
 fastapi
 uvicorn
+python-multipart
