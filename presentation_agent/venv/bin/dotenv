@@ -1,4 +1,4 @@
-#!/app/rajesh/presentation_agent/presentation_agent/venv/bin/python3
+#!/app/rajesh/presentation_agent/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

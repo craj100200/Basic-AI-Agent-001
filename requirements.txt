@@ -1,2 +1,4 @@
 pillow
 moviepy
+fastapi
+uvicorn
